@@ -1,8 +1,8 @@
 # encoding: utf-8
 # author: Thiago da Cunha Borges
+import getopt
 
-
-import http.server
+import servidor
 import json
 import math
 import re
@@ -35,9 +35,9 @@ class Tinycubes:
     def thread(self, n):
         if n == 0:
             if self.bin != '':
-                system(r'nc.exe -bin 3600')
+                system(f'nc.exe -bin {self.bin}')
             else:
-                system(r'nc.exe -bin 3600')
+                system('nc.exe')
         elif n == 1:
             self.conecta()
 
@@ -76,7 +76,22 @@ class Tinycubes:
         self.my_socket.close()
 
 
-TINYCUBES = Tinycubes(bin='3600')
+tinycubes_bin = '3600'
+if __name__ == '__main__':
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "hb:", ["help", "bin="])
+    except getopt.GetoptError as err:
+        print(err)
+        sys.exit(2)
+    for option, arg in opts:
+        if option in ('-b', '--bin'):
+            tinycubes_bin = arg
+        elif option in ('-h', '--help'):
+            print('Use:')
+            print('-b <value> or --bin <value>\t\t\t to change bin')
+            sys.exit(0)
+
+TINYCUBES = Tinycubes(bin=tinycubes_bin)
 
 
 class Schema:
@@ -141,10 +156,12 @@ class Interface(Frame):
         self.master.title('Tinycubes')
         self.master.iconbitmap('favicon.ico')
 
-    def add(self):
+    @staticmethod
+    def add():
         TINYCUBES.send_message('+')
 
-    def remove(self):
+    @staticmethod
+    def remove():
         TINYCUBES.send_message('-')
 
 
@@ -361,7 +378,7 @@ class Requisicao:
             return resposta
 
 
-class Servidor(http.server.BaseHTTPRequestHandler):
+class Servidor(servidor.BaseHTTPRequestHandler):
 
     def do_GET(self):
         request = self.requestline.split()[1]
@@ -384,6 +401,13 @@ def abre_servidor():
         sys.exit(1)
 
 
+def run_web_viewer():
+    handler = servidor.SimpleHTTPRequestHandler
+    with socketserver.TCPServer(('', 8000), handler) as httpd:
+        print("Interface web na porta 8000")
+        httpd.serve_forever()
+
+
 def thread(n):
     if TINYCUBES.conectado:
         if n == 0:
@@ -392,13 +416,12 @@ def thread(n):
             app = Interface()
             app.mainloop()
         elif n == 2:
-            system('python -m http.server 8000')
-            pass
+            run_web_viewer()
         elif n == 3:
-            sleep(2)
+            sleep(0.5)
             system('start http://localhost:8000/web/#config')
     else:
-        sleep(1)
+        sleep(0.5)
         thread(n)
 
 
