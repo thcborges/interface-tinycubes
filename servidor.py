@@ -532,8 +532,8 @@ class BaseHTTPRequestHandler(socketserver.StreamRequestHandler):
         """
         if isinstance(code, HTTPStatus):
             code = code.value
-        self.log_message('"%s" %s %s',
-                         self.requestline, str(code), str(size))
+        # self.log_message('"%s" %s %s',
+        #                  self.requestline, str(code), str(size))
 
     def log_error(self, format, *args):
         """Log an error.
@@ -547,7 +547,7 @@ class BaseHTTPRequestHandler(socketserver.StreamRequestHandler):
 
         """
 
-        self.log_message(format, *args)
+        # self.log_message(format, *args)
 
     def log_message(self, format, *args):
         """Log an arbitrary message.
@@ -566,7 +566,7 @@ class BaseHTTPRequestHandler(socketserver.StreamRequestHandler):
 
         """
 
-        #sys.stderr.write("%s - - [%s] %s\n" %
+        # sys.stderr.write("%s - - [%s] %s\n" %
         #                 (self.address_string(),
         #                  self.log_date_time_string(),
         #                  format%args))
@@ -1140,7 +1140,7 @@ class CGIHTTPRequestHandler(SimpleHTTPRequestHandler):
                 cmdline = [interp, '-u'] + cmdline
             if '=' not in query:
                 cmdline.append(query)
-            self.log_message("command: %s", subprocess.list2cmdline(cmdline))
+            # self.log_message("command: %s", subprocess.list2cmdline(cmdline))
             try:
                 nbytes = int(length)
             except (TypeError, ValueError):
@@ -1169,7 +1169,8 @@ class CGIHTTPRequestHandler(SimpleHTTPRequestHandler):
             if status:
                 self.log_error("CGI script exit status %#x", status)
             else:
-                self.log_message("CGI script exited OK")
+                # self.log_message("CGI script exited OK")
+                pass
 
 
 def test(HandlerClass=BaseHTTPRequestHandler,
