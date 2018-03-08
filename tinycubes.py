@@ -1,5 +1,6 @@
 # encoding: utf-8
 # author: Thiago da Cunha Borges
+
 import getopt
 
 import servidor
@@ -21,8 +22,9 @@ class Tinycubes:
     port = 23456
     my_socket = socket.socket()
 
-    def __init__(self, bin=''):
+    def __init__(self, bin='', start=True):
         self.bin = bin
+        self.start = start
         self.conectado = False
         try:
             for i in range(2):
@@ -33,21 +35,23 @@ class Tinycubes:
             sys.exit(1)
 
     def thread(self, n):
-        if n == 0:
+        if n == 0 and self.start:
             if self.bin != '':
-                system(f'nc.exe -bin {self.bin}')
+                system('nc.exe -bin {}'.format(self.bin))
             else:
                 system('nc.exe')
         elif n == 1:
+            print('Conectando ao tinycubes', end='.')
             self.conecta()
 
     def conecta(self):
         try:
             self.my_socket.connect((self.host, self.port))
-            print('Tinycubes conectado na porta {}'.format(self.port))
+            print('\nTinycubes conectado na porta {}'.format(self.port))
             self.conectado = True
         except ConnectionRefusedError:
-            sleep(1)
+            sleep(0.5)
+            print(end='.')
             self.conecta()
 
     def get_response(self, msg=''):
@@ -61,37 +65,43 @@ class Tinycubes:
                 info += data.decode()
             return info
         except Exception as e:
-            print('\033[0;31m Não foi possível se conectar ao servidor.' + str(e), end='')
-            print('\033[0;30m ')
+            print('Não foi possível se conectar ao servidor.\n' + str(e))
+            self.conecta()
+            return self.get_response(msg)
 
     def send_message(self, msg):
         msg += '\r\n'
         try:
             self.my_socket.send(msg.encode())
         except Exception as e:
-            print('\033[0;31m Não foi possível se conectar ao servidor.' + str(e), end='')
-            print('\033[0;30m ')
+            print('Não foi possível se conectar ao servidor.\n' + str(e))
+            self.conecta()
+            self.send_message(msg)
 
     def close(self):
         self.my_socket.close()
 
 
 tinycubes_bin = '3600'
+tinycubes_start = True
 if __name__ == '__main__':
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hb:", ["help", "bin="])
+        opts, args = getopt.getopt(sys.argv[1:], "hwb:", ["help", "wait", "bin="])
     except getopt.GetoptError as err:
         print(err)
         sys.exit(2)
     for option, arg in opts:
         if option in ('-b', '--bin'):
             tinycubes_bin = arg
+        elif option in ('-w', '--wait'):
+            tinycubes_start = False
         elif option in ('-h', '--help'):
             print('Use:')
             print('-b <value> or --bin <value>\t\t\t to change bin')
+            print('-w or --wait\t\t\t\t to start the tinycubes separately and wait for the connection')
             sys.exit(0)
 
-TINYCUBES = Tinycubes(bin=tinycubes_bin)
+TINYCUBES = Tinycubes(bin=tinycubes_bin, start=tinycubes_start)
 
 
 class Schema:
