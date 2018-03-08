@@ -178,3 +178,11 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+/interface-tinycubes.zip
+/.idea/dbnavigator.xml
+/.idea/interface-tinycubes.iml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/codeStyles/Project.xml
+/.idea/inspectionProfiles/Project_Default.xml
+/.idea/vcs.xml
